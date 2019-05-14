@@ -22,31 +22,32 @@ import org.javagram.response.object.User;
 import org.javagram.response.object.UserContact;
 
 import abstracts.DialogInfo;
+import abstracts.Dialogs;
+import abstracts.UserInfo;
 
 public class ProfilePanel extends JPanel {
-	TelegramApiBridge bridge;
 	private String profileName;
 	private String phone;
 	private List<UserContact> contacts;
 	private Component content;
+	private TelegaFrame cont;
 	//Bitmap photo;
 	
-	public ProfilePanel(TelegramApiBridge connection, AuthAuthorization user, TelegaFrame container) {
+	public ProfilePanel( TelegaFrame container, UserInfo user, Dialogs dialogs) {
 
-		bridge = connection;
+		cont = container;
 		setLayout(new BorderLayout());
-		User userInfo = user.getUser();
-		try {
-			contacts = bridge.contactsGetContacts();
-		} catch (IOException e3) {
-			contacts = null;
-		}
+		//try {
+			//contacts = bridge.contactsGetContacts();
+		//} catch (IOException e3) {
+			//contacts = null;
+		//}
 		
 		//исправить на ввод с постановкой (как на лекции было)
 		try {
-			profileName = new String((userInfo.getFirstName() + " " + userInfo.getLastName()).getBytes(), "Cp1251");
+			profileName = new String((user.getFirstName() + " " + user.getLastName()).getBytes(), "Cp1251");
 		} catch (UnsupportedEncodingException e) {
-			profileName = userInfo.getFirstName() + " " + userInfo.getLastName();
+			profileName = user.getFirstName() + " " + user.getLastName();
 		}
 		
 		
@@ -60,7 +61,7 @@ public class ProfilePanel extends JPanel {
 		info.add(name);
 		
 		//making the user-information panel
-		phone = userInfo.getPhone();
+		phone = user.getPhone();
 		JLabel phoneLabel = new JLabel(phone);
 		name.setFont(new Font("Arial", 1, 20));
 		info.add(phoneLabel);
@@ -72,31 +73,25 @@ public class ProfilePanel extends JPanel {
 		exit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e){
-                	try {
-						bridge.authLogOut();
-						container.setVisible(false);
-						container.dispose();
-						System.exit(0);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+					cont.logOut();
+					container.setVisible(false);
+					container.dispose();
+					System.exit(0);
             }
         });
 		
 		
-		JPanel dialogs = new ContactsPanel(bridge, this);
-		content = dialogs;
+		JPanel dialogsPanel = new ContactsPanel(cont, dialogs);
+		content = dialogsPanel;
 		add(content, BorderLayout.CENTER);
 		
         container.invalidate();
 	}
 	
-	public void OpenDialog(DialogInfo dialog){
-		remove(content);
-		
-		content = new MessagePanel(bridge, dialog);
-		add(content, BorderLayout.CENTER);
+	public void OpenDialog(){
+		cont.switchToContactsPanel();
+        revalidate();
+        repaint();
 	}
 	
 	public ProfilePanel(String userName, String userPhone, String[] userContacts) {

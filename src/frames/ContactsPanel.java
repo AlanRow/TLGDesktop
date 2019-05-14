@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -20,18 +21,20 @@ import org.javagram.response.object.User;
 import org.javagram.response.object.UserContact;
 
 import abstracts.DialogInfo;
+import abstracts.Dialogs;
 import abstracts.UserInfo;
+import exceptions.SessionInterruptedException;
 
 //шаблон вкладки выбора контактов
 public class ContactsPanel extends JPanel {
-	private ProfilePanel container;
-	private TelegramApiBridge bridge;
+	private TelegaFrame container;
+	//private TelegramApiBridge bridge;
 	
-	public ContactsPanel(TelegramApiBridge connection, ProfilePanel cont){
+	public ContactsPanel(TelegaFrame cont, Dialogs dialogs){
 		super();
 		
 		container = cont;
-		bridge = connection;
+		//bridge = connection;
 		
 		//making the contacts-list
 		JPanel contactList = new JPanel();
@@ -39,15 +42,12 @@ public class ContactsPanel extends JPanel {
 		int friendsCount = 0;
 		
 		
-		try {
-			for (MessagesDialog dialog : bridge.messagesGetDialogs()) {
-				friendsCount++;
-				User user = dialog.getPeerUser();
-				JPanel dialogButton = getDialogBrief(new DialogInfo(dialog));
-				contactList.add(dialogButton);
-			}
-		} catch (IOException e2) {
-				e2.printStackTrace();
+		for (DialogInfo dialog : dialogs.getDialogs()) {
+			friendsCount++;
+			MessagesDialog dia;
+			UserInfo user = dialog.getPeerUser();
+			JPanel dialogButton = getDialogBrief(dialog);
+			contactList.add(dialogButton);
 		}
 				
 		//show the contacts count in the top of screen
@@ -69,7 +69,7 @@ public class ContactsPanel extends JPanel {
 		dialogBrief.setLayout(new BorderLayout());
 		
 		//записываем сверху имя пользователя с которым ведется диалог
-		UserInfo user = dialog.getUser();
+		UserInfo user = dialog.getPeerUser();
 		JLabel userName = new JLabel(user.getFirstName() + " " + user.getLastName());
 		userName.setFont(new Font("Arial", 10, 10));
 		dialogBrief.add(userName, BorderLayout.NORTH);
@@ -91,7 +91,7 @@ public class ContactsPanel extends JPanel {
 		goDialog.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				container.OpenDialog(dialog);
+				container.switchToDialog(dialog);
 			}
 		});
 		

@@ -22,7 +22,7 @@ public class DialogInfo {
 		input = tlgDialog.getPeerUser();
 	}
 	
-	public UserInfo getUser(){
+	public UserInfo getPeerUser(){
 		return user;
 	}
 	

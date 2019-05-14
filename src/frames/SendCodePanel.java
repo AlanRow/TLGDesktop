@@ -42,7 +42,7 @@ public class SendCodePanel extends InactiveLoginPanel {
                     return;
                 }
 
-                container.Switch(new ProfilePanel(bridge, user, container));
+                container.switchToUserProfile();
                 revalidate();
                 repaint();
             }

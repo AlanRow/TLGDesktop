@@ -13,6 +13,7 @@ import main.OnCenterLayout;
 import org.javagram.TelegramApiBridge;
 import org.javagram.response.AuthSentCode;
 
+import abstracts.Connection;
 import files.ConfSaver;
 
 //панель отправки телефона
@@ -22,29 +23,23 @@ public class SendPhonePanel extends InactiveLoginPanel {
 	ConfSaver recentlyNums;
 	JComboBox<String> phonesScroll;
 	
-	public SendPhonePanel(TelegaFrame container, TelegramApiBridge bridge) {
+	public SendPhonePanel(TelegaFrame container, TelegramApiBridge bridge, List<String> phones) {
 		super("Enter your phone number", "Send code");
-		initAction(container, bridge);
+		initAction(container, bridge, phones);
 	}
 	
-	public SendPhonePanel(TelegaFrame container, TelegramApiBridge bridge, LayoutManager layout) {
+	public SendPhonePanel(TelegaFrame container, TelegramApiBridge bridge, List<String> phones, LayoutManager layout) {
 		super("Enter your phone number", "Send code", layout);
-		initAction(container, bridge);
+		initAction(container, bridge, phones);
 	}
 	
-	private void initAction(TelegaFrame container, TelegramApiBridge bridge) {
+	private void initAction(TelegaFrame container, TelegramApiBridge bridge,  List<String> phones ) {
 		
-
-		recentlyNums = new ConfSaver();
+		String[] phonesArr = new String[phones.size()];
+		for (int i = 0; i < phones.size(); i++)
+			phonesArr[i] = phones.get(i);
 		
-		List<String> phonesList = recentlyNums.getRecentlyPhones();
-		String[] phones = new String[phonesList.size()];
-		
-		for (int i = 0; i < phones.length; i++)
-			phones[i] = phonesList.get(i);
-		
-		//String[] phones = (String[]) recentlyNums.getRecentlyPhones().toArray();
-		phonesScroll = new JComboBox<String>(phones);
+		phonesScroll = new JComboBox<String>(phonesArr);
 		phonesScroll.setEditable(true);
 		Component[] comps = getComponents();
 		
@@ -74,7 +69,7 @@ public class SendPhonePanel extends InactiveLoginPanel {
                 //}
                 recentlyNums.addPhone(phonesScroll.getModel().getSelectedItem().toString());
                 recentlyNums.save();
-                container.Switch(new SendCodePanel(container, bridge, new OnCenterLayout()));
+                container.switchToAuthenticatePanel();
                 revalidate();
                 repaint();
             }

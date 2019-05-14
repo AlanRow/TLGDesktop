@@ -23,29 +23,12 @@ import abstracts.DialogInfo;
 //панель беседы
 public class MessagePanel extends JPanel {
 
-	public MessagePanel(TelegramApiBridge bridge, DialogInfo dialog){
+	public MessagePanel(TelegaFrame cont, TelegramApiBridge bridge, DialogInfo dialog){
 		
 		super();
-		
-		/*MessagesMessages history;
-		try {
-			history = bridge.messagesGetHistory(dialog.getUser(), 0, 100, 100);
-		} catch (IOException e) {
-			history = null;
-		}*/
-		
-		//List<MessagesMessage> messes = history.getMessages();
-		
-		//JPanel mesList = new JPanel();
-		
-		//for (MessagesMessage mes : messes){
-			//mesList.add(new JLabel(mes.getMessage()));
-		//}
-		
-		//JScrollPane messages = new JScrollPane(mesList);
-		//add(messages, BorderLayout.CENTER);
+
 		setLayout(new BorderLayout());
-		JLabel userName = new JLabel(dialog.getUser().getFullName());
+		JLabel userName = new JLabel(dialog.getPeerUser().getFullName());
 		add(userName, BorderLayout.NORTH);
 		
 		JTextField message = new JTextField();
