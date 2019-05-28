@@ -330,6 +330,7 @@ public class TelegramApi {
                 }
             } else {
                 throw new TimeoutException();
+            	//return null;
             }
         } else {
             return (T) res[0];

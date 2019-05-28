@@ -11,9 +11,16 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import abstracts.Connection;
+import abstracts.DefaultSession;
+import abstracts.DefaultState;
+import abstracts.NormState;
+import abstracts.State;
+import abstracts.Switcher;
+
 public class NotConnectPanel extends JPanel {
 	
-	public NotConnectPanel(TelegaFrame admin, LayoutManager layout) {
+	public NotConnectPanel(Switcher switcher, LayoutManager layout) {
 
 		super(layout);
     	add(new JLabel("We have some problem with Telegram!"));
@@ -25,8 +32,9 @@ public class NotConnectPanel extends JPanel {
     	next.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				admin.setDefaultOptions();
-				admin.switchToUserProfile();
+				Connection defaultSession = new DefaultSession();
+				switcher.switchTo(new ProfilePanel(switcher, new DefaultState(), 
+						defaultSession));
 			}
 		});
     	choosePan.add(next, BorderLayout.WEST);
@@ -35,8 +43,7 @@ public class NotConnectPanel extends JPanel {
     	exit.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				admin.dispose();
-				admin.setVisible(false);
+				switcher.exit();
 			}
 		});
     	choosePan.add(exit, BorderLayout.EAST);

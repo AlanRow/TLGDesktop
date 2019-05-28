@@ -18,26 +18,30 @@ import org.javagram.TelegramApiBridge;
 
 import abstracts.AccountInfo;
 import abstracts.Connection;
+import abstracts.Session;
+import abstracts.State;
+import abstracts.Switcher;
 import abstracts.DialogInfo;
+import abstracts.NormState;
+import exceptions.NotConnectException;
 import exceptions.SessionInterruptedException;
 import main.OnCenterLayout;
 
-public class TelegaFrame extends Frame {
+public class TelegaFrame extends Frame implements Switcher {
 
-    private TelegramApiBridge bridge;
+    private Connection bridge;
     private AccountInfo info;
     private JPanel mainPanel;
     private boolean isConnect;
 
-    public TelegaFrame(/*TelegramApiBridge bridge*/) {
+    public TelegaFrame() throws IOException {
 
     	isConnect = true;
         try {
-            //bridge = new TelegramApiBridge("149.154.167.50:443", 460089, "43e09d7d74956467ea21152facf3c328");
-        	throw new IOException();
-        } catch (IOException e) {
-        	System.out.println("It's done!");
-        	switchToNotConnectPanel();
+        	//bridge = new TelegramApiBridge("82.102.22.48:443", 460089, "43e09d7d74956467ea21152facf3c328");
+            bridge = new Session("149.154.167.40:443", 638443, "6999a27be540e72b2f8ddc8e04810c50");
+        } catch (NotConnectException e) {
+        	switchTo(new NotConnectPanel(this, new OnCenterLayout()));
         	return;
         } finally {
             setBounds(0, 0, 800, 640);
@@ -45,11 +49,10 @@ public class TelegaFrame extends Frame {
             addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
-					TelegaFrame.this.setVisible(false);
-					TelegaFrame.this.dispose();
                 	try {
-						bridge.authLogOut();
-					} catch (IOException e1) {
+                		exit();
+						bridge.logOut();
+					} catch (NotConnectException e1) {
 						e1.printStackTrace();
 					}
                 }
@@ -57,68 +60,35 @@ public class TelegaFrame extends Frame {
 
         }
         
-        //setBackground(Color.blue);
-        /*setLayout(new BorderLayout());
+        State state = new NormState(bridge);
+        
+        setLayout(new BorderLayout());
         java.util.List<String> phones = new ArrayList<String>();
         phones.add("8 (950) 657 05-33");
-        switchToLogInPanel(phones);*/
-        //mainPanel = new ProfilePanel("Alan", "88888888888", new String[] {"Inga", "Olga", "Andrew", "Dora"});
-        //add(mainPanel);
+        switchTo(new SendPhonePanel(this, state, bridge, phones, new OnCenterLayout()));
+    }
+    
+    @Override
+    public void exit() {
+		TelegaFrame.this.setVisible(false);
+		TelegaFrame.this.dispose();
     }
     
     public void setDefaultOptions() {
     	isConnect = false;
     	info = AccountInfo.getDefault();
     }
-    
-    public void switchToLogInPanel(java.util.List<String> phones) {
-    	switchMainPanel(new SendPhonePanel(this, bridge, phones, new OnCenterLayout()));
-    }
-    
-    public void switchToAuthenticatePanel() {
-    	switchMainPanel((new SendCodePanel(this, bridge, new OnCenterLayout())));
-    }
-    
-    public void switchToContactsPanel() {
-		try {
-			switchMainPanel(new ContactsPanel(this, info.getDialogs()));
-		} catch (SessionInterruptedException e) {
-			switchMainPanel(new ContactsPanel(this, info.getLastDialogs()));
-		}
-    }
-    
-    public void switchToUserProfile() {
-    	try {
-			switchMainPanel(new ProfilePanel(this, info.getUser(), info.getDialogs()));
-		} catch (SessionInterruptedException e) {
-			switchMainPanel(new ProfilePanel(this, info.getUser(),info.getLastDialogs()));
-		}
-    }
-    public void switchToDialog(DialogInfo dialog) {
-    	switchMainPanel(new MessagePanel(this, bridge, dialog));
-    }
-    
-    public void switchToNotConnectPanel(){
-    	switchMainPanel(new NotConnectPanel(this, new OnCenterLayout()));
-    }
-    
-    public void logOut() {
-    	try {
-			bridge.authLogOut();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }
-    
-    private void switchMainPanel(JPanel switchingPanel) {
+
+	@Override
+	public void switchTo(JPanel switching) {
     	try {
     		remove(mainPanel);
     	} catch (NullPointerException ex) {}
-    	mainPanel = switchingPanel;
+    	mainPanel = switching;
     	add(mainPanel);
     	
     	invalidate();
     	revalidate();
     	repaint();
-    }
+	}
 }

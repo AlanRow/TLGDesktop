@@ -12,37 +12,41 @@ import org.javagram.TelegramApiBridge;
 import org.javagram.response.AuthAuthorization;
 import org.javagram.response.AuthSentCode;
 
+import abstracts.Connection;
+import abstracts.State;
+import abstracts.Switcher;
+
 public class SendCodePanel extends InactiveLoginPanel {
 //QUESTS:
 	//1: errors handing
 	//2: layout management
 	//3: sending messages
 
-	public SendCodePanel(TelegaFrame container, TelegramApiBridge bridge) {
+	public SendCodePanel(Switcher container, State state, Connection bridge) {
 		super("Enter check-code", "Ok");
-		initAction(container, bridge);
+		initAction(container, state, bridge);
 	}
 	
-	public SendCodePanel(TelegaFrame container, TelegramApiBridge bridge, LayoutManager layout) {
+	public SendCodePanel(Switcher container, State state, Connection bridge, LayoutManager layout) {
 		super("Enter check-code", "Ok", layout);
-		initAction(container, bridge);
+		initAction(container, state, bridge);
 	}
 	
-	private void initAction(TelegaFrame container, TelegramApiBridge bridge) {
+	private void initAction(Switcher container, State state, Connection bridge) {
 
 		sendInfo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e){
             	AuthAuthorization user;
                 try {
-                    user = bridge.authSignIn(((JTextField)logField).getText());
+                    user = bridge.logIn(((JTextField)logField).getText());
                 } catch (IOException e1) {
                 	error.setText("Code is incorrect. Please, try again.");
                 	add(error);
                     return;
                 }
 
-                container.switchToUserProfile();
+                container.switchTo(new ProfilePanel(container, state, bridge));
                 revalidate();
                 repaint();
             }

@@ -18,12 +18,15 @@ import org.javagram.response.MessagesMessages;
 import org.javagram.response.object.MessagesDialog;
 import org.javagram.response.object.MessagesMessage;
 
+import abstracts.Connection;
 import abstracts.DialogInfo;
+import abstracts.Switcher;
+import exceptions.NotConnectException;
 
 //панель беседы
 public class MessagePanel extends JPanel {
 
-	public MessagePanel(TelegaFrame cont, TelegramApiBridge bridge, DialogInfo dialog){
+	public MessagePanel(Switcher switcher, Connection connect, DialogInfo dialog){
 		
 		super();
 
@@ -46,8 +49,8 @@ public class MessagePanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					bridge.messagesSendMessage(dialog.getInputPeer(), sendMessage.getText(), (long)(Math.random() * Long.MAX_VALUE));
-				} catch (IOException e1) {
+					connect.sendMessage(dialog.getInputPeer(), sendMessage.getText(), (long)(Math.random() * Long.MAX_VALUE));
+				} catch ( NotConnectException e1) {
 					sendMessage.setBackground(Color.RED);
 				}
 			}

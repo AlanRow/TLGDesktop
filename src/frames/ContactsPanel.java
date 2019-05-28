@@ -20,27 +20,27 @@ import org.javagram.response.object.MessagesDialog;
 import org.javagram.response.object.User;
 import org.javagram.response.object.UserContact;
 
-import abstracts.DialogInfo;
-import abstracts.Dialogs;
-import abstracts.UserInfo;
+import abstracts.*;
 import exceptions.SessionInterruptedException;
 
 //шаблон вкладки выбора контактов
 public class ContactsPanel extends JPanel {
-	private TelegaFrame container;
+	private Switcher switcher;
+	private Connection connect;
 	//private TelegramApiBridge bridge;
 	
-	public ContactsPanel(TelegaFrame cont, Dialogs dialogs){
+	public ContactsPanel(Switcher cont, State state, Connection connection){
 		super();
 		
-		container = cont;
+		switcher = cont;
+		connect = connection;
 		//bridge = connection;
 		
 		//making the contacts-list
 		JPanel contactList = new JPanel();
 		contactList.setLayout(new BoxLayout(contactList, BoxLayout.Y_AXIS));
 		int friendsCount = 0;
-		
+		Dialogs dialogs = state.getDialogs();
 		
 		for (DialogInfo dialog : dialogs.getDialogs()) {
 			friendsCount++;
@@ -91,7 +91,7 @@ public class ContactsPanel extends JPanel {
 		goDialog.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				container.switchToDialog(dialog);
+				switcher.switchTo(new MessagePanel(switcher, connect, dialog));
 			}
 		});
 		

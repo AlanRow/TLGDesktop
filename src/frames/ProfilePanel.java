@@ -21,21 +21,25 @@ import org.javagram.response.object.MessagesDialog;
 import org.javagram.response.object.User;
 import org.javagram.response.object.UserContact;
 
+import abstracts.Connection;
 import abstracts.DialogInfo;
 import abstracts.Dialogs;
+import abstracts.State;
+import abstracts.Switcher;
 import abstracts.UserInfo;
+import exceptions.NotConnectException;
 
 public class ProfilePanel extends JPanel {
 	private String profileName;
 	private String phone;
 	private List<UserContact> contacts;
 	private Component content;
-	private TelegaFrame cont;
+	private Switcher cont;
 	//Bitmap photo;
 	
-	public ProfilePanel( TelegaFrame container, UserInfo user, Dialogs dialogs) {
+	public ProfilePanel(Switcher switcher, State state, Connection connect) {
 
-		cont = container;
+		cont = switcher;
 		setLayout(new BorderLayout());
 		//try {
 			//contacts = bridge.contactsGetContacts();
@@ -44,6 +48,7 @@ public class ProfilePanel extends JPanel {
 		//}
 		
 		//исправить на ввод с постановкой (как на лекции было)
+		UserInfo user = state.getCurrentUser();
 		try {
 			profileName = new String((user.getFirstName() + " " + user.getLastName()).getBytes(), "Cp1251");
 		} catch (UnsupportedEncodingException e) {
@@ -73,62 +78,26 @@ public class ProfilePanel extends JPanel {
 		exit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e){
-					cont.logOut();
-					container.setVisible(false);
-					container.dispose();
+            		try {
+            			connect.logOut();
+            		} catch (NotConnectException ex) {}
+            		switcher.exit();
 					System.exit(0);
             }
         });
 		
 		
-		JPanel dialogsPanel = new ContactsPanel(cont, dialogs);
+		JPanel dialogsPanel = new ContactsPanel(switcher, state, connect);
 		content = dialogsPanel;
 		add(content, BorderLayout.CENTER);
 		
-        container.invalidate();
-	}
-	
-	public void OpenDialog(){
-		cont.switchToContactsPanel();
-        revalidate();
-        repaint();
-	}
-	
-	public ProfilePanel(String userName, String userPhone, String[] userContacts) {
-
-		setLayout(new BorderLayout());
-		
-		//исправить на ввод с постановкой (как на лекции было)
-		profileName = userName;
-		
-		JPanel info = new JPanel();
-		info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
-		info.setAlignmentX(LEFT_ALIGNMENT);
-		
-		JLabel name = new JLabel(profileName);
-		name.setFont(new Font("Arial", 1, 20));
-		info.add(name);
-		
-		phone = userPhone;
-		JLabel phoneLabel = new JLabel(phone);
-		name.setFont(new Font("Arial", 1, 20));
-		info.add(phoneLabel);
-		
-		add(info, BorderLayout.WEST);
-		
-		JButton exit = new JButton("Log out");
-		add(exit, BorderLayout.SOUTH);
-		
-		JPanel contactList = new JPanel();
-		
-		for (String friend : userContacts) {
-			contactList.add(new JButton(friend));
-		}
-		
-		JScrollPane contacts = new JScrollPane(contactList);
-		
-		add(contacts, BorderLayout.CENTER);
-
         invalidate();
 	}
+	
+	//where does it use?
+	//public void OpenDialog(){
+		//cont.switchTo(new ContactsPanel(switcher, state, connect));
+        //revalidate();
+        //repaint();
+	//}
 }

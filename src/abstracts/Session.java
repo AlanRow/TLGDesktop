@@ -5,18 +5,76 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.javagram.TelegramApiBridge;
+import org.javagram.response.AuthAuthorization;
+import org.javagram.response.AuthSentCode;
+import org.javagram.response.object.InputPeer;
 import org.javagram.response.object.MessagesDialog;
+import org.javagram.response.object.User;
 
+import exceptions.NotConnectException;
 import exceptions.WrongPhoneNumberException;
 
-public class Connection {
+public class Session implements Connection {
 	//private List<Account> accounts;
-	private List<DialogInfo> dialogs;
-	TelegramApiBridge bridge;
+	private TelegramApiBridge bridge;
+	private AuthAuthorization auth;
 	
-	public Connection(TelegramApiBridge extBridge) {
-		bridge = extBridge;
-		dialogs = new ArrayList<DialogInfo>();
+	
+	public Session(String host, int id, String hash) throws NotConnectException {
+		try {
+			bridge = new TelegramApiBridge(host, id, hash);
+		} catch (IOException ex) {
+			throw new NotConnectException();
+		}
+	}
+
+
+	
+	public void logOut() throws NotConnectException{
+		
+		try {
+		bridge.authLogOut();
+		} catch (IOException ex) {
+			throw new NotConnectException();
+		}
+	}
+
+	@Override
+	public AuthSentCode sendCode(String phone) throws WrongPhoneNumberException {
+		if (bridge != null) {
+			try {
+				return bridge.authSendCode(phone.replaceAll("[^0-9]+", ""));
+			} catch (IOException e) {
+				throw new WrongPhoneNumberException(phone);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public AuthAuthorization logIn(String code) throws IOException {
+		auth = bridge.authSignIn(code);
+		return auth;
+	}
+
+	@Override
+	public void sendMessage(InputPeer inputPeer, String message, long id) throws NotConnectException {
+			try {
+			bridge.messagesSendMessage(inputPeer, message, id);
+			} catch (IOException ex) {
+				throw new NotConnectException();
+			}
+	}
+
+	@Override
+	public User getCurrentUser() {
+		if (auth == null)
+			return null;
+		return auth.getUser();
+	}
+
+	@Override
+	public List<MessagesDialog> getDialogs() {
 		List<MessagesDialog> extDialogs;
 		try {
 			extDialogs = bridge.messagesGetDialogs();
@@ -25,29 +83,6 @@ public class Connection {
 			//добавить возможность чтения из кэша
 		}
 		
-		for (MessagesDialog dialog : extDialogs) {
-			dialogs.add(new DialogInfo(dialog));
-		}
-	}
-	
-	public Connection(List<DialogInfo> extDialogs) {
-		dialogs = extDialogs;
-	}
-	
-	public void sendPhone(String phone) throws WrongPhoneNumberException {
-		if (bridge != null) {
-				try {
-					bridge.authSendCode(phone.replaceAll("[^0-9]+", ""));
-				} catch (IOException e) {
-					throw new WrongPhoneNumberException(phone);
-				}
-		}
-		else {
-			//проверка номера на существование в кэше
-		}
-	}
-	
-	public void logOut() {
-		//выход из аккаунта
+		return extDialogs;
 	}
 }

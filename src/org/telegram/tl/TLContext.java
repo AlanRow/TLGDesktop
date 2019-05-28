@@ -116,7 +116,7 @@ public abstract class TLContext {
                 throw new DeserializeException("Unsupported class: #" + Integer.toHexString(clazzId));
             }
         } catch (DeserializeException e) {
-            throw e;
+           throw e;
         } catch (Exception e) {
             e.printStackTrace();
             throw new IOException("Unable to deserialize data");
